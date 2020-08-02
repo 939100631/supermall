@@ -2,7 +2,7 @@
   <div class="goods-item" @click="itemClick">
 <!--    监听图片加载完成：1.原生的js监听图片：img.onload = function(){}-->
 <!--                    2.vue中监听：@load='方法'-->
-    <img :src="goodsItem.show.img" @load="imageLoad">
+    <img :src="showImage" @load="imageLoad">
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -22,6 +22,11 @@
         }
       }
     },
+    computed: {
+      showImage() {
+        return this.goodsItem.image || this.goodsItem.show.img
+      }
+    },
     methods: {
 
       // 事件总线:涉及到非父子组件的通信
@@ -29,8 +34,14 @@
       // this.$bus.$emit('事件名称')
       // this.$bus.$on('事件名称',回调函数(参数))
       imageLoad() {
-        // console.log('imageLoad');
         this.$bus.$emit('itemImageLoad')
+
+        // 各自监听自己的全局事件0
+        // if(this.$route.path.indexOf('/home')){
+        //   this.$bus.$emit('homeItemImageLoad')
+        // }else if(this.$route.path.indexOf('/detail')){
+        //   this.$bus.$emit('detailItemImageLoad')
+        // }
       },
 
       // 获取详情页的iid

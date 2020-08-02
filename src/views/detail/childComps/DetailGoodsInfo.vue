@@ -35,14 +35,16 @@
         // if(this.counter === this.imagesLength) {
         if(++this.counter === this.imagesLength) {
           this.$emit('imageLoad')
+          console.log('123');
         }
+
       }
     },
     // 监听到属性改变
     watch: {
       detailInfo() {
         // 获取图片个数
-        this.imagesInfo = this.detailInfo.detailImage[0].list.length
+        this.imagesLength = this.detailInfo.detailImage[0].list.length
       }
     }
   }

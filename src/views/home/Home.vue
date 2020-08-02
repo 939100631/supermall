@@ -38,7 +38,7 @@
   import BackTop from "components/content/backtop/BackTop";
 
   import {getHomeMultidata, getHomeGoods} from "network/home";
-  import {debounce} from "common/utils";
+  import {itemListenerMixin} from "../../common/mixin";
 
   export default {
     name: "Home",
@@ -52,6 +52,7 @@
       Scroll,
       BackTop
     },
+    mixins: [itemListenerMixin],
     data (){
       return {
         // 保存请求data的数据
@@ -66,7 +67,8 @@
         isShowBackTop: true,
         tabOffsetTop: 0,
         isTabFixed: false,
-        saveY: 0
+        saveY: 0,
+        // itemImgListener: null
       }
     },
     computed: {
@@ -81,8 +83,12 @@
       this.$refs.scroll.refresh()
     },
     deactivated() {
+      //1. 保存Y值
       this.saveY = this.$refs.scroll.getScrollY()
-      console.log(this.saveY);
+      // console.log(this.saveY);
+
+      // 2.取消全局事件的监听
+      this.$bus.$off('itemImgLoad', this.itemImgListener)
     },
 
     created() {
@@ -93,17 +99,28 @@
       this.getHomeGoods('pop')
       this.getHomeGoods('new')
       this.getHomeGoods('sell')
+
+      // 3.手动代码点击一次
+      this.tabClick(0)
     },
     mounted() {
 
-      const refresh = debounce(this.$refs.scroll.refresh)
-      // 3.监听item中图片加载完成
-      this.$bus.$on('itemImageLoad', () => {
-        // this.$refs.scroll.refresh()
-        // console.log('-----');
-        refresh()
-      })
+      // const refresh = debounce(this.$refs.scroll.refresh)
+      // // 3.监听item中图片加载完成
+      // this.$bus.$on('itemImageLoad', () => {
+      //   // this.$refs.scroll.refresh()
+      //   // console.log('-----');
+      //   refresh()
+      // })
 
+      // 这个地方img标签确实被挂载，但是其中的图片还没有占据高度
+      // let newRefresh = debounce(this.$refs.scroll.refresh, 100)
+      //
+      // // 对监听的事件进行保存
+      // this.itemImgListener = ()=> {
+      //   newRefresh()
+      // }
+      // this.$bus.$on('itemImgLoad', this.itemImgListener)
     },
     methods: {
       /*
@@ -124,8 +141,11 @@
             break
         }
         // 保持吸顶栏一致
-        this.$refs.tabControl1.currentIndex = index;
-        this.$refs.tabControl2.currentindex = index;
+        if(this.$refs.tabControl1 !== undefined) {
+          this.$refs.tabControl1.currentIndex = index;
+          this.$refs.tabControl2.currentindex = index;
+        }
+
       },
       backClick() {
         this.$refs.scroll.scrollTo(0, 0)
